@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDISP - Asistente de Ventiladores Mecánicos</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #F0F8FF; /* Azul pastel */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container, .chat-container {
+            width: 400px;
+            background-color: #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-container.active, .chat-container.active {
+            display: flex; /* Mostrar solo cuando se activa */
+        }
+
+        .header {
+            background-color: #005A9C; /* Azul profesional */
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .chat-window {
+            padding: 10px;
+            background-color: #F9F9F9;
+            height: 350px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-bubble {
+            background-color: #005A9C;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            width: fit-content;
+            max-width: 80%;
+            color: white;
+            text-align: justify;
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background-color: #99CCFF; /* Burbuja del usuario */
+            color: black;
+        }
+
+        .user-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            background-color: #E6F7FF;
+            border-top: 1px solid #CCC;
+        }
+
+        .user-input input, .user-input button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+            outline: none;
+            font-size: 16px;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .user-input button {
+            background-color: #005A9C;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .user-input button:hover {
+            background-color: #004080;
+        }
+
+        /* Estilos de la pantalla de login */
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .login-container button {
+            background-color: #005A9C;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .login-container button:hover {
+            background-color: #004080;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor de Login -->
+    <div class="login-container active" id="login-container">
+        <div class="header">Iniciar Sesión - MEDISP</div>
+        <input type="text" id="username" placeholder="Usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button onclick="login()">Entrar</button>
+        <p id="error-message" style="color: red; display: none;">Usuario o contraseña incorrectos</p>
+    </div>
+
+    <!-- Contenedor de Chat -->
+    <div class="chat-container" id="chat-container">
+        <div class="header">
+            MEDISP - Asistente de Ventiladores Mecánicos
+        </div>
+        <div class="chat-window" id="chat-window">
+            <!-- Mensaje de bienvenida -->
+            <div class="chat-bubble">
+                ¡Hola! Soy <strong>MEDISP</strong>, tu asistente para la solución de problemas de ventiladores mecánicos. Escríbeme tu problema y trataré de ayudarte.
+            </div>
+        </div>
+        <div class="user-input">
+            <input type="text" id="userMessage" placeholder="Describe tu problema...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Credenciales de login
+        const credenciales = {
+            usuario: "medisp",
+            contraseña: "1234"
+        };
+
+        // Base de datos del chatbot
+        const baseDatos = {
+            "válvula espiratoria y trampa de agua": "Verifique las condiciones en las que se encuentra la membrana de la válvula espiratoria y su trampa de agua, no deben contener fisuras o roturas, de ser así reemplácelo para tener un buen funcionamiento de la válvula.",
+            "microfiltros o filtros de polvo": "Localice el filtro afectado (compartimiento trasero del ventilador), presione las pestañas laterales del compartimiento y retire la cubierta del filtro. Extraiga el filtro viejo y revise si presenta acumulación de suciedad o daño físico (rotura). Si está en mal estado, reemplácelo por un filtro nuevo insertando el filtro nuevo en su soporte hasta que quede ajustado. Vuelva a colocar la cubierta y asegúrese de que las pestañas encajen correctamente.",
+            "sensores de flujo, presión u oxígeno defectuosos": "Apague el ventilador y desconectelo de la corriente eléctrica, 		localice el sensor afectado (flujo, presión u oxígeno) en el área correspondiente. 		Desmonte el sensor afectado girando suavemente y desconectándolo del conector 		eléctrico. Inspeccione si el sensor tiene suciedad o daño físico. Reemplace el sensor 	defectuoso conectando uno nuevo y asegúrese de que esté bien fijado. Encienda el 	ventilador y realice la calibración del sensor, si lo anterior no soluciona el error entonces  Identifique la ubicación del sensor de oxígeno (tras la cubierta del panel de conexión). Retire el sensor antiguo girando suavemente y desconectándolo. Instale el sensor nuevo conectándolo y asegurándose de que quede firme. Realice una calibración manual del sensor antes de usar el dispositivo.",
+            "fugas de aire en mangueras o conexiones": "Inspeccione las mangueras y conexiones del sistema neumático para localizar la fuga. Si encuentra una manguera dañada, desconéctela del conector afectado girándola suavemente. Corte la sección dañada o reemplace la manguera completa por una nueva de acuerdo al daño asociado. Conecte la manguera en su posición original asegurándose de que quede bien ajustada. Realice una prueba de estanqueidad verificando que no existan más fugas.",
+            "válvulas neumáticas bloqueadas o defectuosas": "Identifique si la válvula bloqueada o defectuosa es espiratoria, de calibración o de emergencia. Retire la cubierta correspondiente para acceder a la válvula. Limpie la válvula con aire comprimido seco para eliminar cualquier obstrucción. Si la válvula no funciona correctamente, retírela aflojando los tornillos de fijación y desconectando las mangueras asociadas. Instale una válvula nueva asegurándose de conectar correctamente las mangueras y fijar los tornillos. Pruebe el sistema verificando que la válvula funcione correctamente.",
+            "ventilador o bypass con bajo rendimiento": "Apague el ventilador y desconéctelo de la corriente eléctrica. Acceda al compartimiento trasero donde se encuentra el ventilador. Limpie las aspas y el interior del ventilador con un paño seco o aire comprimido, si el ventilador está dañado, retire los tornillos de fijación y desconéctelo del conector eléctrico. Sustitúyalo por un ventilador nuevo, asegurándose de fijarlo correctamente. Realice una prueba funcional verificando el flujo de aire.",
+            "fallos en las baterías internas": "Apague el ventilador y desconéctelo de la corriente. Retire la cubierta trasera del dispositivo para acceder a las baterías. Desconecte los terminales positivo y negativo de las baterías dañadas con mucho cuidado. Retire las baterías antiguas y deséchelas correctamente. Instale las nuevas baterías asegurándose de conectar correctamente los terminales según la polaridad. Vuelva a montar la cubierta trasera y cargue las baterías durante al menos 10 horas antes de usar el equipo, es fundamental NO encender el equipo antes de tiempo.",
+            "pantalla o perilla rotatoria no funcionales": "Apague el ventilador y desconéctelo de la corriente eléctrica. Retire la cubierta del panel de control utilizando un destornillador e inspeccione las conexiones de la pantalla o la perilla. Si la perilla o pantalla está dañada, retírela desconectando el conector y reemplácela por una nueva. Vuelva a ensamblar la cubierta del panel de control. Encienda el ventilador y verifique que el panel y la perilla respondan correctamente.",
+            "fusibles dañados o incorrectos": "Identifique el compartimiento de fusibles en la parte trasera del ventilador. Retire el fusible dañado utilizando un extractor o pinzas. Reemplace el fusible por uno nuevo del mismo valor (5A o 15A según especificado). Vuelva a montar el compartimiento y verifique el funcionamiento del ventilador.",
+            "alarmas no audibles o configuradas incorrectamente": "Acceda a la configuración de alarmas desde el menú principal y asegúrese de que el volumen esté configurado a un nivel adecuado. Si persisten los problemas, revise el altavoz interno y cámbielo si es necesario.",
+            "sobrecalentamiento del sistema": "Mantenga una distancia mínima de 12 cm entre el dispositivo y cualquier pared u obstáculo. Limpie las entradas y salidas de aire para evitar obstrucciones. Evite exponer el ventilador a luz solar directa o fuentes de calor.",
+            "uso incorrecto de accesorios desechables": "Verifique que los accesorios desechables no hayan sido reutilizados o reprocesados. Instale los accesorios siguiendo las instrucciones del fabricante y asegúrese de que estén bien conectados."
+        };
+
+        // Función para calcular similitud textual
+        function calcularSimilitud(str1, str2) {
+            const palabras1 = str1.toLowerCase().split(" ");
+            const palabras2 = str2.toLowerCase().split(" ");
+            const conjuntoPalabras = new Set([...palabras1, ...palabras2]);
+
+            let interseccion = 0;
+            conjuntoPalabras.forEach(palabra => {
+                if (palabras1.includes(palabra) && palabras2.includes(palabra)) {
+                    interseccion++;
+                }
+            });
+
+            return interseccion / conjuntoPalabras.size;
+        }
+
+        // Función para encontrar la mejor coincidencia
+        function encontrarMejorCoincidencia(pregunta) {
+            let mejorCoincidencia = null;
+            let mayorSimilitud = 0;
+
+            for (const problema of Object.keys(baseDatos)) {
+                const similitud = calcularSimilitud(pregunta, problema);
+                if (similitud > mayorSimilitud) {
+                    mejorCoincidencia = problema;
+                    mayorSimilitud = similitud;
+                }
+            }
+
+            return mejorCoincidencia;
+        }
+
+        // Función de login
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (username === credenciales.usuario && password === credenciales.contraseña) {
+                // Mostrar el chat y ocultar el login
+                document.getElementById('login-container').classList.remove('active');
+                document.getElementById('chat-container').classList.add('active');
+            } else {
+                // Mostrar mensaje de error
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        // Función para enviar mensajes
+        function sendMessage() {
+            const chatWindow = document.getElementById('chat-window');
+            const userMessage = document.getElementById('userMessage').value.trim();
+
+            if (userMessage === '') return; // Evitar mensajes vacíos
+
+            // Crear burbuja del usuario
+            const userBubble = document.createElement('div');
+            userBubble.classList.add('chat-bubble', 'user');
+            userBubble.textContent = userMessage;
+            chatWindow.appendChild(userBubble);
+
+            // Limpiar el input
+            document.getElementById('userMessage').value = '';
+
+            // Respuesta de MEDISP
+            setTimeout(() => {
+                const responseBubble = document.createElement('div');
+                responseBubble.classList.add('chat-bubble');
+
+                const mejorCoincidencia = encontrarMejorCoincidencia(userMessage);
+                if (mejorCoincidencia) {
+                    responseBubble.textContent = baseDatos[mejorCoincidencia];
+                } else {
+                    responseBubble.textContent = 'Lo siento, no encontré una solución específica. Por favor, consulta el manual o contacta a un técnico especializado.';
+                }
+
+                chatWindow.appendChild(responseBubble);
+                chatWindow.scrollTop = chatWindow.scrollHeight; // Hacer scroll al final
+            }, 1000);
+
+            // Hacer scroll al final del chat
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
