@@ -178,8 +178,7 @@
         };
 
         // Función para calcular similitud textual
-        function calcularSimilitud(str1, str2) {
-            const palabras1 = str1.toLowerCase().split(" ");
+        function calcularSimilitud(palabras1, str2) {
             const palabras2 = str2.toLowerCase().split(" ");
             const conjuntoPalabras = new Set([...palabras1, ...palabras2]);
 
@@ -197,9 +196,10 @@
         function encontrarMejorCoincidencia(pregunta) {
             let mejorCoincidencia = null;
             let mayorSimilitud = 0;
+            const palabrasPregunta = pregunta.toLowerCase().split(" ");
 
             for (const problema of Object.keys(baseDatos)) {
-                const similitud = calcularSimilitud(pregunta, problema);
+                const similitud = calcularSimilitud(palabrasPregunta, problema);
                 if (similitud > mayorSimilitud) {
                     mejorCoincidencia = problema;
                     mayorSimilitud = similitud;
