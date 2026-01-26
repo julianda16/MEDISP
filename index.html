@@ -181,16 +181,24 @@
         function calcularSimilitud(str1, str2) {
             const palabras1 = str1.toLowerCase().split(" ");
             const palabras2 = str2.toLowerCase().split(" ");
-            const conjuntoPalabras = new Set([...palabras1, ...palabras2]);
+
+            const set1 = new Set(palabras1);
+            const set2 = new Set(palabras2);
 
             let interseccion = 0;
-            conjuntoPalabras.forEach(palabra => {
-                if (palabras1.includes(palabra) && palabras2.includes(palabra)) {
-                    interseccion++;
+            // Iterate over the smaller set for efficiency
+            if (set1.size < set2.size) {
+                for (const palabra of set1) {
+                    if (set2.has(palabra)) interseccion++;
                 }
-            });
+            } else {
+                for (const palabra of set2) {
+                    if (set1.has(palabra)) interseccion++;
+                }
+            }
 
-            return interseccion / conjuntoPalabras.size;
+            const unionSize = set1.size + set2.size - interseccion;
+            return unionSize === 0 ? 0 : interseccion / unionSize;
         }
 
         // Función para encontrar la mejor coincidencia
