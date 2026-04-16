@@ -177,14 +177,11 @@
             "uso incorrecto de accesorios desechables": "Verifique que los accesorios desechables no hayan sido reutilizados o reprocesados. Instale los accesorios siguiendo las instrucciones del fabricante y asegúrese de que estén bien conectados."
         };
 
+        const problemasBaseDatos = Object.keys(baseDatos);
+        const problemasSets = problemasBaseDatos.map(problema => new Set(problema.toLowerCase().split(" ")));
+
         // Función para calcular similitud textual
-        function calcularSimilitud(str1, str2) {
-            const palabras1 = str1.toLowerCase().split(" ");
-            const palabras2 = str2.toLowerCase().split(" ");
-
-            const set1 = new Set(palabras1);
-            const set2 = new Set(palabras2);
-
+        function calcularSimilitud(set1, set2) {
             let interseccion = 0;
             // Optimización: iterar sobre el conjunto más pequeño
             const smallerSet = set1.size < set2.size ? set1 : set2;
@@ -206,8 +203,12 @@
             let mejorCoincidencia = null;
             let mayorSimilitud = 0;
 
-            for (const problema of Object.keys(baseDatos)) {
-                const similitud = calcularSimilitud(pregunta, problema);
+            const setPregunta = new Set(pregunta.toLowerCase().split(" "));
+
+            for (let i = 0; i < problemasBaseDatos.length; i++) {
+                const problema = problemasBaseDatos[i];
+                const setProblema = problemasSets[i];
+                const similitud = calcularSimilitud(setPregunta, setProblema);
                 if (similitud > mayorSimilitud) {
                     mejorCoincidencia = problema;
                     mayorSimilitud = similitud;
