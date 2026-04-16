@@ -234,10 +234,13 @@
             }
         }
 
+        // Elementos del DOM en caché
+        const chatWindow = document.getElementById('chat-window');
+        const userMessageInput = document.getElementById('userMessage');
+
         // Función para enviar mensajes
         function sendMessage() {
-            const chatWindow = document.getElementById('chat-window');
-            const userMessage = document.getElementById('userMessage').value.trim();
+            const userMessage = userMessageInput.value.trim();
 
             if (userMessage === '') return; // Evitar mensajes vacíos
 
@@ -248,7 +251,7 @@
             chatWindow.appendChild(userBubble);
 
             // Limpiar el input
-            document.getElementById('userMessage').value = '';
+            userMessageInput.value = '';
 
             // Respuesta de MEDISP
             setTimeout(() => {
