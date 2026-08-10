@@ -218,19 +218,25 @@
             return mejorCoincidencia;
         }
 
+        // Elementos del DOM en caché para login
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMessageDiv = document.getElementById('error-message');
+        const loginContainer = document.getElementById('login-container');
+        const chatContainer = document.getElementById('chat-container');
+
         // Función de login
         function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
+            const username = usernameInput.value;
+            const password = passwordInput.value;
 
             if (username === credenciales.usuario && password === credenciales.contraseña) {
                 // Mostrar el chat y ocultar el login
-                document.getElementById('login-container').classList.remove('active');
-                document.getElementById('chat-container').classList.add('active');
+                loginContainer.classList.remove('active');
+                chatContainer.classList.add('active');
             } else {
                 // Mostrar mensaje de error
-                errorMessage.style.display = 'block';
+                errorMessageDiv.style.display = 'block';
             }
         }
 
